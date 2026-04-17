@@ -7,6 +7,8 @@ const Workspace = () => {
     const cyRef = useRef<HTMLDivElement | null>(null);
     const cyInstance = useRef<cytoscape.Core | null>(null);
     const nodeIdCounter = useRef<number>(1);
+    const currentSourceId = useRef<string | null>(null);
+    const edgesArray = useRef<string[]>([]);
 
     useEffect(() => {
 
@@ -55,6 +57,29 @@ const Workspace = () => {
 
             nodeIdCounter.current++;
         })
+
+        cyInstance.current.on('cxttap', "node", (e) => {
+        
+            if (!currentSourceId.current) {
+                currentSourceId.current = e.target.data('id');
+            } else {
+                const targetId = e.target.data('id');
+                const edgeId = `${currentSourceId.current}-${targetId}`
+                if (!edgesArray.current.includes(edgeId)) {
+                    cyInstance.current?.add({
+                        group: "edges",
+                        data: { 
+                            id: edgeId,
+                            source: currentSourceId.current,
+                            target: targetId,
+                        },
+                    });
+                    edgesArray.current.push(edgeId)
+                }
+                currentSourceId.current = null;
+            }
+
+        });
 
         return () => {
             cyInstance.current?.destroy();
