@@ -6,18 +6,16 @@ import cytoscape from 'cytoscape';
 const Workspace = () => {
     const cyRef = useRef<HTMLDivElement | null>(null);
     const cyInstance = useRef<cytoscape.Core | null>(null);
-    
+    const nodeIdCounter = useRef<number>(1);
+
     useEffect(() => {
 
         if (!cyRef.current) return;
 
+      
+
         cyInstance.current = cytoscape({
         container: cyRef.current,
-        elements: [
-            { data: { id: "a" } },
-            { data: { id: "b" } },
-            { data: { source: "a", target: "b" } },
-        ],
         style: [
             {
             selector: 'node',
@@ -44,6 +42,20 @@ const Workspace = () => {
         layout: { name: 'grid' },
         });
         
+        cyInstance.current.on('tap', (e) =>{
+            if (e.target !== cyInstance.current) return;
+
+            const newId = `${nodeIdCounter.current}`;
+            const pos = e.position;
+
+            cyInstance.current?.add({
+                data: { id: newId },
+                position: { x: pos.x, y:pos.y },
+            });
+
+            nodeIdCounter.current++;
+        })
+
         return () => {
             cyInstance.current?.destroy();
         };
