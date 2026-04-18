@@ -58,7 +58,15 @@ const Workspace = () => {
             nodeIdCounter.current++;
         })
 
-        cyInstance.current.on('cxttap', "node", (e) => {
+        cyInstance.current.on('cxttap', (e) => {
+
+            if (e.target === cyInstance.current || !e.target.isNode()) {
+                if (currentSourceId.current) {
+                cyInstance.current?.$(`#${currentSourceId.current}`).style('background-color', '#6366f1');
+                currentSourceId.current = null;
+                }
+                return;
+            }
         
             if (!currentSourceId.current) {
                 currentSourceId.current = e.target.data('id');
@@ -82,6 +90,8 @@ const Workspace = () => {
             }
 
         });
+
+
 
         return () => {
             cyInstance.current?.destroy();
