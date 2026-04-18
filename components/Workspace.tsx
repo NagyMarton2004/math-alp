@@ -8,8 +8,7 @@ const Workspace = () => {
     const cyInstance = useRef<cytoscape.Core | null>(null);
     const nodeIdCounter = useRef<number>(1);
     const currentSourceId = useRef<string | null>(null);
-    const edgesArray = useRef<string[]>([]);
-
+    
     useEffect(() => {
 
         if (!cyRef.current) return;
@@ -44,6 +43,7 @@ const Workspace = () => {
         layout: { name: 'grid' },
         });
         
+      
         cyInstance.current.on('tap', (e) =>{
             if (e.target !== cyInstance.current) return;
 
@@ -62,10 +62,12 @@ const Workspace = () => {
         
             if (!currentSourceId.current) {
                 currentSourceId.current = e.target.data('id');
+                cyInstance.current?.$(`#${currentSourceId.current}`).style('background-color', '#f59e0b');
             } else {
                 const targetId = e.target.data('id');
-                const edgeId = `${currentSourceId.current}-${targetId}`
-                if (!edgesArray.current.includes(edgeId)) {
+                const edgeId = `${currentSourceId.current}-${targetId}`;
+                const alreadyExists = (cyInstance.current?.edges(`[source = "${currentSourceId.current}"][target = "${targetId}"]`)?.length ?? 0) > 0;
+                if (!alreadyExists) {
                     cyInstance.current?.add({
                         group: "edges",
                         data: { 
@@ -74,8 +76,8 @@ const Workspace = () => {
                             target: targetId,
                         },
                     });
-                    edgesArray.current.push(edgeId)
                 }
+                cyInstance.current?.$(`#${currentSourceId.current}`).style('background-color', '#6366f1');
                 currentSourceId.current = null;
             }
 
